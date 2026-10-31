@@ -63,9 +63,11 @@
   \setsansfont{Latin Modern Sans}%
   \newfontfamily\rubiksemibold{Latin Modern Sans}[BoldFont=*-Bold]%
 }
-\IfFontExistsTF{Fira Code}{\setmonofont{Fira Code}[Scale=0.85]}{%
-  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont{DejaVu Sans Mono}[Scale=0.82]}{%
-    \setmonofont{Latin Modern Mono}}}
+% Fuente monoespaciada del código: Consolas -> Fira Code -> DejaVu Sans Mono -> Latin Modern Mono
+\IfFontExistsTF{Consolas}{\setmonofont{Consolas}}{%
+  \IfFontExistsTF{Fira Code}{\setmonofont{Fira Code}[Scale=0.85]}{%
+    \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont{DejaVu Sans Mono}[Scale=0.82]}{%
+      \setmonofont{Latin Modern Mono}}}}
 
 % ---------------------------------------------------------------------
 %  COLORES
@@ -74,8 +76,8 @@
 \definecolor{sectionblue}{HTML}{0B6CB5}   % secciones y subsecciones
 \definecolor{linkblue}{HTML}{1155CC}      % enlaces
 \definecolor{rulegray}{HTML}{B5B5B5}      % línea bajo los títulos
-\definecolor{termbg}{HTML}{1E1F29}        % fondo de terminal
-\definecolor{termfg}{HTML}{E6E6E6}
+\definecolor{codebg}{HTML}{F5F5F5}        % fondo de los bloques de código
+\definecolor{bgcmd}{HTML}{F4F4F4}         % fondo del código en línea
 
 % ---------------------------------------------------------------------
 %  PÁGINA, PÁRRAFOS E INTERLINEADO
@@ -146,14 +148,14 @@
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
 \renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
 \setlength{\cftbeforesecskip}{0.6em}
-\setlength{\cftbeforesubsecskip}{0.1em}
+\setlength{\cftbeforesubsecskip}{0.05em}
 \setlength{\cftsecindent}{0pt}
 \setlength{\cftsubsecindent}{0em}
 \setlength{\cftsecnumwidth}{1.6em}
 \setlength{\cftsubsecnumwidth}{2.6em}
 \setlength{\cftaftertoctitleskip}{1em}
 % ---------------------------------------------------------------------
-%  FIGURAS Y PIES DE FIGURA  →  “Figura 1. Texto del pie.”
+%  FIGURAS Y PIES DE FIGURA  →  Figura 1. Texto del pie.
 % ---------------------------------------------------------------------
 \captionsetup{format=plain,labelsep=period,font={it,small},
               justification=centering,singlelinecheck=false,
@@ -178,27 +180,46 @@
 % ---------------------------------------------------------------------
 %  CÓDIGO
 % ---------------------------------------------------------------------
-\newcommand{\codigo}[1]{\texttt{#1}}      % código en línea
+% Código en línea: texto monoespaciado sobre fondo gris claro
+\newcommand{\codigo}[1]{\colorbox{bgcmd}{\texttt{#1}}}
 
-\lstdefinestyle{terminal}{
-  backgroundcolor=\color{termbg},
-  basicstyle=\ttfamily\footnotesize\color{termfg},
+% Bloques de código: fondo gris claro, recuadro gris, numeración a la izquierda
+\lstdefinestyle{codigo}{
+  basicstyle=\ttfamily\fontsize{10}{12}\selectfont,
+  backgroundcolor=\color{codebg},
+  frame=single,             % Recuadro
+  aboveskip=1.5em,          % Espacio extra ANTES del código
+  rulecolor=\color{gray},   % Color del borde
+  xleftmargin=16pt,         % Empuja todo el bloque hacia la derecha
+  framexrightmargin=5pt,    % Aire en el interior derecho
+  xrightmargin=5pt,         % Equilibra el margen derecho
   breaklines=true,
-  breakatwhitespace=false,
-  columns=fullflexible,
-  keepspaces=true,
-  frame=single,
-  rulecolor=\color{termbg},
-  framesep=6pt,
-  xleftmargin=6pt,xrightmargin=6pt,
-  aboveskip=1em,belowskip=1em,
-  showstringspaces=false,
-  upquote=true,
-  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
-           {ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
-           {Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¡}{{!`}}1 {¿}{{?`}}1
+  captionpos=b,             % Títulos de código abajo
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal},
+  tabsize=2,
+  showstringspaces=false
 }
-\lstset{style=terminal}
+\lstset{style=codigo}
+
+% ---------------------------------------------------------------------
+% Definición de lenguajes extra
+% ---------------------------------------------------------------------
+\lstdefinelanguage{PowerShell}{
+  morekeywords={ss, telnet, dig, ping, ssh},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+\lstdefinelanguage{Python}{
+  keywords={def, return, if, else, elif, for, while, import, from, as, class, try, except},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
 
 % Listas
 \setlist{itemsep=0.2em,topsep=0.3em}
@@ -243,60 +264,305 @@
 \clearpage
 
 % ---------------------------------------------------------------------
-%  CONTENIDO  (ejemplo; sustituir por el contenido real)
+%  CONTENIDO
 % ---------------------------------------------------------------------
-\section{Modificación de la configuración del Servidor Apache.}
+\section{Fichero .m para la Solución del Ejercicio}
 
-\subsection{Preparación del certificado raíz de la FNMT.}
+\subsection{Valores de Entrada del Fichero}
 
-El servidor ahora mismo acepta solo certificados firmados por la autoridad
-de la asignatura. Esto es un párrafo de ejemplo con texto justificado y
-sangría en la primera línea, igual que en el documento original, con
-\codigo{código en línea} y un enlace a una página:
-\href{https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt}{https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt}.
+El ejercicio propuesto consiste en la creación de un fichero .m que reciba como entrada los valores de dicha señal y los
+correspondientes instantes de tiempo, y devuelva los siguientes resultados:
 
-Para referenciar una figura se usa \figref{fig:ejemplo}, y se inserta con el
-comando \codigo{\textbackslash figura}:
+\begin{itemize}[label=$\bullet$]
+  \item \textbf{Frecuencia amortiguada [Hz]:} Calculada como la inversa del pseudo-periodo de la respuesta.
+  \item \textbf{Tiempo de establecimiento [seg]:} Calculado como el tiempo que tarda la señal en entrar en +-5\% de su valor final.
+  \item \textbf{Tiempo de pico [seg]:} Instante de tiempo en el que se produce la primera sobreoscilación.
+  \item \textbf{Error en régimen permanente}
+\end{itemize}
 
-\figura[0.9]{ejemplo.png}{fig:ejemplo}{Pie de figura de ejemplo.}
+Para la obtención de los resultados, se ha realizado el siguiente código en MatLab, fichero que se puede ver adjunto a la entrega o a través del siguiente enlace:
+\href{https://github.com/ivanperezdiaz829/SRA/blob/main/Ejercicio_Individual_1/sol_ejercicio_1.m}{solución-ejercicio-1-Iván-Pérez-Díaz.m}.
 
-Bloque de terminal con fondo oscuro:
+El objetivo final es simular un sistema similar al de la \figref{fig:final-state}.
 
-\begin{lstlisting}
-$ sudo cp Descargas/AC_FNMT_Usuarios.cer /etc/apache2/ssl
-$ sudo openssl x509 -inform DER -in AC_FNMT_Usuarios.cer -out fnmt_usuarios.pem
+\figura[0.9]{final-state.png}{fig:final-state}{Estado final del sistema deseado.}
+
+\subsection{Cabecera y Entradas}
+
+\begin{lstlisting}[language=Matlab]
+function [frec_amortiguada, temp_establecimiento, temp_pico, error_permanente] = sol_ejercicio_1(t, y, r)
 \end{lstlisting}
 
-\subsection{Habilitar la ejecución de Scripts CGI-Bin Bash.}
+La función recibe la señal \textbf{y} y sus correspondientes instantes de tiempo \textbf{t} y devuelve los cuatro resultados
+pedidos en el enunciado del ejercicio, además, como señal de referencia, se ha añadido la entrada \textbf{r} que funciona como referencia del escalón y sirve para calcular el error en régimen permanente.
 
-Texto de la subsección. Lista de ejemplo:
-\begin{itemize}
-  \item Primer elemento.
-  \item Segundo elemento.
+\begin{lstlisting}[language=Matlab]
+if nargin < 3, r = 1; end
+t = t(:); y = y(:);  
+\end{lstlisting}
+
+\begin{itemize}[label=$\bullet$]
+  \item \codigo{nargin}\textbf{:} Es el número de argumentos con los que se ha llamado a la función. Si no se pasa \codigo{r} se asume un escalón unitario, encajando con la figura en donde la referencia es 1.
+  \item \codigo{t(:)} \textbf{e} \codigo{y(:)}\textbf{:} Fuerzan a que ambos sean vectores columna, independientemente de cómo se pasen a la función. Arreglando posibles problemas cuando se use el bloque \codigo{To Workspace} de Simulink, que puede devolver vectores fila. 
 \end{itemize}
 
-\section{Instalación/Creación del Script de sustitución.}
+\subsection{Valor Final}
 
-Contenido de la segunda sección.
+\begin{lstlisting}[language=Matlab]
+y_final = y(end);
+\end{lstlisting}
 
-% ---------------------------------------------------------------------
-%  BIBLIOGRAFÍA
-% ---------------------------------------------------------------------
-\clearpage
-\section*{Bibliografía}
-\addcontentsline{toc}{section}{Bibliografía}
+Se toma como valor final la última muestra de la señal ya que en una respuesta subamortiguada las oscilaciones se atenuán y la señal se estabiliza, loq ue supone que la simulación dura lo suficiente para que ya esté asentada.
+Es el \textbf{\textit{"valor final"}} que aparece en la \figref{fig:final-state}.
 
-\subsubsection*{Apuntes de la asignatura}
-\begin{itemize}
-  \item[\textbullet] [1] ``Apuntes de SEGURIDAD DE LA INFORMACIÓN'', notas de
-  clase para 40988, Departamento de Informática y Sistemas, Universidad de
-  Las Palmas de Gran Canaria, 2022.
+\subsection{Tiempo de Pico}
+
+Para la detección de máximos locales, se ha programado la siguiente línea de código:
+
+\begin{lstlisting}[language=Matlab]
+idx_picos = find(diff(sign(diff(y))) < 0) + 1;
+\end{lstlisting}
+
+\begin{itemize}[label=$\bullet$]
+  \item \codigo{diff(y)}\textbf{:} Calcula la diferencia entre muestras consecutivas, es decir, la dervidada discreta. Es positiva si la señal sube y negativa si baja.
+  \item \codigo{sign(...)}\textbf{:} Convierte la dereviada discreta en 1 (sube), -1 (baja) o 0 (plana).
+  \item \codigo{diff(sign(...))}\textbf{:} Calcula la diferencia entre muestras consecutivas de la derivada discreta. Si la señal pasa de subir a bajar, la diferencia es negativa, y si pasa de bajar a subir, es positiva.
+  \item \codigo{find(... < 0)}\textbf{:} Devuelve las posiciones donde ocurre un cambio de subida a bajada, es decir, los máximos locales.
+  \item El \codigo{+ 1} es necesario porque la función \codigo{diff} devuelve un vector con una longitud menor que el original, por lo que hay que compensar el índice. La posición \codigo{k} del resultado corresponde con la muestra \codigo{k+1} de \codigo{y}.
 \end{itemize}
 
-\subsubsection*{Modelos de Inteligencia Artificial}
-\begin{itemize}
-  \item[\textbullet] [2] Google, ``Gemini 3.1 Pro'' [IA generativa y multimodal
-  avanzada], 2026. Disponible en: \url{https://gemini.google.com}
+El resultado \codigo{idx\_picos}, contiene los índices de todos los picos, en orden temporal. El primero es la sobreoscilación principal y el segundo es el siguiente máximo local, mucho más pequeño.
+
+En cuanto a la obtención del tiempo de pico, se ha programado la siguiente línea de código:
+
+\begin{lstlisting}[language=Matlab]
+if ~isempty(idx_picos)
+  temp_pico = t(idx_picos(1));
+else
+  [~, idx] = max(y); temp_pico = t(idx);
+end
+\end{lstlisting}
+
+La rama \codigo{else} es una protección. Si no se detecta ningún máximo local, se toma el máximo global con \codigo{max(y)}. La virgulilla descarta el valor máximo porque solo interesa su índice.
+
+\subsection{Frecuencia Amortiguada}
+
+\begin{lstlisting}[language=Matlab]
+if numel(idx_picos) >= 2
+  T_d = t(idx_picos(2)) - t(idx_picos(1));
+  frec_amortiguada = 1 / T_d;
+else
+  frec_amortiguada = 0;
+end
+\end{lstlisting}
+
+El enunciado define la frecuencia amortiguada como la inversa del pseudo-periodo. El pseudo-periodo \codigo{T\_d} es el tiempo entre dos picos consecutivos, y el código usa los dos primeros.
+Su inversa está en Hz.
+
+Se exige \codigo{numel(idx\_picos) >= 2} porque si hay menos de dos picos, no se puede calcular el pseudo-periodo. En ese caso, se devuelve 0.
+
+\subsection{Tiempo de Establecimiento}
+
+\begin{lstlisting}[language=Matlab]
+banda = 0.05 * abs(y_final);
+fuera_banda = find(abs(y - y_final) > banda);
+if isempty(fuera_banda)
+  temp_establecimiento = t(1);
+else
+  temp_establecimiento = t(min(fuera_banda(end) + 1, numel(t)));
+end 
+\end{lstlisting}
+
+El enunciado define el tiempo de establecimiento como el tiempo que tarda la señal en entrar en +-5\% de su valor final y quedarse dentro. En la \figref{fig:final-state} son las líneas discontinuas alrededor del valor final.
+
+\begin{itemize}[label=$\bullet$]
+  \item \codigo{banda}\textbf{:} Es la semianchura de la franja de +-5\% del valor final. El \codigo{abs} evita una banda negativa en el caso de que el valor final fuese negativo.
+  \item \codigo{abs(y - y\_final) > banda}\textbf{:} Marca las muestras que están fuera de la franja, y el \codigo{find} devuelve sus índices.
+  \item \codigo{fuera\_banda(end)}\textbf{:} Es la última muestra que está fuera de al franja. Se usa la última y no la primera porque con oscilaciones, la señal puede entrar y salir de la banda varias veces anrtes de asentarse.
+  \item \codigo{min(..., numel(t))}\textbf{:} Evita salirse del vector si la última muestra aún está fuera de la banda. En ese caso, devuelve el último instante.
 \end{itemize}
+
+\subsection{Error en Régimen Permanente}
+
+\begin{lstlisting}[language=Matlab]
+error_permanente = abs(r - y_final);
+\end{lstlisting}
+
+\section{Modelo y Simulación en Simulink}
+
+\subsection{Diagrama Completo}
+
+Para crear el diagrama, tras guardar el proyecto se ha de ir a \textbf{Simulink} y poner los siguientes bloques para poder ejecutar correctamente la simulación y poder ver la onda final:
+
+\begin{itemize}[label=$\bullet$]
+  \item \textbf{Step:} Simula la entrada escalón (\codigo{r}).
+  \item \textbf{Transfer Fcn:} Es la simulación del sistema subamortiguado.
+  \item \textbf{To Workspace:} Es el espacio de trabajo hecho en MatLab explicado en el \textbf{primer punto} de este documento.
+  \item \textbf{Scope:} Se usa para ver la señal resultante.
+\end{itemize}
+
+Una vez puestos todos los bloques, el diagrama se ve tal y como se aprecia en la \figref{fig:diagrama}.
+
+\figura[0.9]{diagrama.png}{fig:diagrama}{Diagrama en Simulink.}
+
+\subsection{Bloque Step}
+
+\figura[0.49]{step.png}{fig:step}{Parámetros del Bloque Step.}
+
+\subsection{Bloque Transfer Fcn}
+
+\figura[0.48]{transfer-fcn.png}{fig:fcn}{Parámetros del Bloque Transfer Fcn.}
+
+\subsection{Bloque To workspace}
+
+\figura[0.6]{toWorkspace.png}{fig:workspace}{Parámetros del bloque toWorkspace.}
+
+\section{Script de prueba del fichero .m.}
+ 
+\subsection{Objetivo del script.}
+ 
+Para comprobar que la función \codigo{sol\_ejercicio\_1} calcula correctamente los cuatro resultados pedidos, se ha creado el fichero \codigo{test\_sol\_ejercicio\_1.m}. El script realiza los siguientes pasos:
+ 
+\begin{itemize}
+  \item Genera una respuesta temporal subamortiguada de un sistema de segundo orden, de la que se conocen sus valores teóricos.
+  \item Llama a la función con la señal, los instantes de tiempo y la referencia.
+  \item Compara los resultados calculados con los teóricos.
+  \item Dibuja la señal marcando las magnitudes obtenidas y guarda la gráfica en PDF y PNG.
+\end{itemize}
+ 
+\subsection{Parámetros y generación de la señal.}
+ 
+\begin{lstlisting}[language=Matlab]
+r    = 1;        % Referencia del escalón
+K    = 0.9;      % Ganancia estática
+wn   = 20;       % Frecuencia natural no amortiguada [rad/s]
+zeta = 0.3;      % Coeficiente de amortiguamiento
+ 
+Tm    = 1e-3;    % Paso de muestreo [s]
+t_fin = 2;       % Duración de la simulación [s]
+\end{lstlisting}
+ 
+Se define un sistema de segundo orden con amortiguamiento $\zeta = 0.3$, que al ser menor que 1 produce una respuesta subamortiguada, es decir, con oscilaciones que se atenúan. La ganancia estática $K = 0.9$ se ha elegido distinta de la referencia para que el sistema se estabilice por debajo de ella y exista un error en régimen permanente medible. La duración de 2 segundos es suficiente para que la señal se asiente, y el paso de $1$ ms fija la precisión temporal de los resultados.
+ 
+\begin{lstlisting}[language=Matlab]
+t   = (0:Tm:t_fin)';
+wd  = wn*sqrt(1 - zeta^2);
+phi = acos(zeta);
+y   = K*r*(1 - exp(-zeta*wn*t)/sqrt(1 - zeta^2) .* sin(wd*t + phi));
+\end{lstlisting}
+ 
+La señal se genera con la expresión analítica de la respuesta al escalón de un sistema de segundo orden subamortiguado:
+ 
+\[
+y(t) = K\,r\left(1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\,\sin(\omega_d t + \varphi)\right),
+\quad \omega_d = \omega_n\sqrt{1-\zeta^2},\quad \varphi = \arccos(\zeta)
+\]
+ 
+\begin{itemize}
+  \item \codigo{t}\textbf{:} Vector columna de instantes de tiempo, desde 0 hasta \codigo{t\_fin} con paso \codigo{Tm}. La comilla final lo traspone para que sea columna, como espera la función.
+  \item \codigo{wd}\textbf{:} Frecuencia natural amortiguada $\omega_d$ en rad/s.
+  \item \codigo{phi}\textbf{:} Desfase $\varphi$ de la senoidal.
+  \item \codigo{y}\textbf{:} Señal resultante. El operador \codigo{.*} multiplica elemento a elemento los vectores del exponencial y el seno.
+\end{itemize}
+ 
+Si en lugar de esta señal sintética se quisiera usar la obtenida con Simulink, bastaría sustituir estas líneas por la lectura de las variables que genera el bloque \codigo{To Workspace} (por ejemplo, \codigo{t = y2.Time; y = y2.Data;} si se guarda como \codigo{Timeseries}).
+ 
+\subsection{Llamada a la función y valores teóricos.}
+ 
+\begin{lstlisting}[language=Matlab]
+[frec_amortiguada, temp_establecimiento, temp_pico, error_permanente] = ...
+    sol_ejercicio_1(t, y, r);
+ 
+fd_teo  = wd/(2*pi);
+tp_teo  = pi/wd;
+ts_teo  = -log(0.05*sqrt(1 - zeta^2))/(zeta*wn);
+ess_teo = abs(r - K*r);
+\end{lstlisting}
+ 
+Primero se invoca la función con la señal, el tiempo y la referencia, y se guardan los cuatro resultados. A continuación se calculan los valores teóricos con las fórmulas conocidas de un sistema de segundo orden:
+ 
+\begin{itemize}
+  \item \textbf{Frecuencia amortiguada:} $f_d = \omega_d / 2\pi$, que es la inversa del pseudo-periodo.
+  \item \textbf{Tiempo de pico:} $t_p = \pi / \omega_d$, instante de la primera sobreoscilación.
+  \item \textbf{Tiempo de establecimiento (5\%):} se obtiene igualando la envolvente exponencial de las oscilaciones al 5\%, por lo que es una aproximación.
+  \item \textbf{Error permanente:} $|r - Kr|$, diferencia entre la referencia y el valor final al que tiende el sistema.
+\end{itemize}
+ 
+\subsection{Resultados por pantalla.}
+ 
+\begin{lstlisting}[language=Matlab]
+fprintf('%-30s %12s %12s\n', 'Magnitud', 'Calculado', 'Teorico');
+fprintf('%-30s %12.4f %12.4f\n', 'Frecuencia amortiguada [Hz]', ...
+        frec_amortiguada, fd_teo);
+% ... (una línea equivalente para cada resultado)
+\end{lstlisting}
+ 
+Se muestra una tabla por la consola de MATLAB con cada magnitud calculada junto a su valor teórico. El formato \codigo{\%-30s} alinea el texto a la izquierda en 30 caracteres y \codigo{\%12.4f} escribe los números con 4 decimales. Los resultados obtenidos se recogen en la Tabla~\ref{tab:resultados}.
+ 
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    \textbf{Magnitud} & \textbf{Calculado} & \textbf{Teórico} \\
+    \midrule
+    Frecuencia amortiguada [Hz]     & 3.0395 & 3.0365 \\
+    Tiempo de establecimiento [s]   & 0.5070 & 0.5071 \\
+    Tiempo de pico [s]              & 0.1650 & 0.1647 \\
+    Error en régimen permanente     & 0.1000 & 0.1000 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Resultados calculados por la función y valores teóricos.}
+  \label{tab:resultados}
+\end{table}
+ 
+Los valores calculados coinciden con los teóricos salvo diferencias del orden de la milésima. Esto es lo esperado, porque la función solo puede devolver instantes que coinciden con una muestra, y el paso de muestreo es de $1$ ms. En el caso del tiempo de establecimiento, el valor teórico es además una aproximación basada en la envolvente.
+ 
+\subsection{Representación gráfica.}
+ 
+\begin{lstlisting}[language=Matlab]
+y_final = y(end);
+[~, ip] = min(abs(t - temp_pico));
+y_pico  = y(ip);
+ 
+plot(t, y, 'b', 'LineWidth', 1.8); hold on; grid on;
+plot([t(1) t(end)], [r r], 'k-');
+plot([t(1) t(end)], [y_final y_final], 'k--');
+plot([t(1) t(end)], 1.05*y_final*[1 1], 'b:');
+plot([t(1) t(end)], 0.95*y_final*[1 1], 'b:');
+plot(temp_pico, y_pico, 'ro', 'MarkerFaceColor', 'r');
+plot([temp_establecimiento temp_establecimiento], ...
+     [0 1.05*y_final], 'g--');
+plot([t(end) t(end)], [y_final r], 'm-', 'LineWidth', 3);
+\end{lstlisting}
+ 
+El script dibuja la señal y superpone sobre ella las magnitudes calculadas, de forma similar a la figura del enunciado:
+ 
+\begin{itemize}
+  \item \codigo{min(abs(t - temp\_pico))}\textbf{:} Busca la muestra más cercana al tiempo de pico para obtener su altura \codigo{y\_pico}.
+  \item \textbf{Línea negra continua:} Referencia $r$.
+  \item \textbf{Línea negra discontinua:} Valor final de la señal.
+  \item \textbf{Líneas azules punteadas:} Banda de $\pm5\%$ alrededor del valor final.
+  \item \textbf{Punto rojo:} Primera sobreoscilación, en el instante del tiempo de pico.
+  \item \textbf{Línea vertical verde:} Tiempo de establecimiento, a partir del cual la señal queda dentro de la banda.
+  \item \textbf{Segmento magenta:} Error en régimen permanente, entre el valor final y la referencia.
+\end{itemize}
+ 
+El resultado se muestra en la \figref{fig:respuesta-temporal}.
+ 
+\figura[0.9]{respuesta-temporal.png}{fig:respuesta-temporal}{Respuesta temporal de prueba con los resultados calculados.}
+ 
+\subsection{Exportación de la figura.}
+ 
+\begin{lstlisting}[language=Matlab]
+try
+    exportgraphics(fig, 'respuesta_temporal.pdf', 'ContentType', 'vector');
+    exportgraphics(fig, 'respuesta_temporal.png', 'Resolution', 300);
+catch
+    saveas(fig, 'respuesta_temporal.png');
+    print(fig, 'respuesta_temporal.pdf', '-dpdf', '-bestfit');
+end
+\end{lstlisting}
+ 
+Por último, la gráfica se guarda en dos formatos: PDF vectorial, que es el que pide la entrega, y PNG con 300 ppp para incluirlo en este documento. El bloque \codigo{try/catch} intenta usar \codigo{exportgraphics}, disponible en versiones recientes de MATLAB, y, si falla, recurre a \codigo{saveas} y \codigo{print}, que funcionan en versiones antiguas.
 
 \end{document}
