@@ -418,151 +418,172 @@ Una vez puestos todos los bloques, el diagrama se ve tal y como se aprecia en la
 \figura[0.6]{toWorkspace.png}{fig:workspace}{Parámetros del bloque toWorkspace.}
 
 \section{Script de prueba del fichero .m.}
- 
+
 \subsection{Objetivo del script.}
- 
-Para comprobar que la función \codigo{sol\_ejercicio\_1} calcula correctamente los cuatro resultados pedidos, se ha creado el fichero \codigo{test\_sol\_ejercicio\_1.m}. El script realiza los siguientes pasos:
- 
-\begin{itemize}
-  \item Genera una respuesta temporal subamortiguada de un sistema de segundo orden, de la que se conocen sus valores teóricos.
-  \item Llama a la función con la señal, los instantes de tiempo y la referencia.
-  \item Compara los resultados calculados con los teóricos.
-  \item Dibuja la señal marcando las magnitudes obtenidas y guarda la gráfica en PDF y PNG.
-\end{itemize}
- 
-\subsection{Parámetros y generación de la señal.}
- 
+
+El script comprueba que la función \codigo{sol\_ejercicio\_1} funciona bien. Para ello crea una señal de la que se conocen los resultados exactos, se la pasa a la función y compara lo que devuelve con los valores teóricos. Por último, dibuja la señal marcando cada resultado.
+
+La señal es la misma que produce el modelo de Simulink de la sección anterior ($\omega_n = 20$, $\zeta = 0.3$ y $K = 0.9$), pero aquí se genera con su fórmula. Para ver el código, véase el documento: \href{https://github.com/ivanperezdiaz829/SRA/blob/main/Ejercicio_Individual_1/Ejercicio_1_test.m}{Ejercicio-1-Test.m}
+
+\subsection{Parámetros del Sistema}
+
 \begin{lstlisting}[language=Matlab]
-r    = 1;        % Referencia del escalón
-K    = 0.9;      % Ganancia estática
-wn   = 20;       % Frecuencia natural no amortiguada [rad/s]
-zeta = 0.3;      % Coeficiente de amortiguamiento
- 
+r    = 1;        % Referencia del escalon
+K    = 0.9;      % Ganancia estatica (valor final = K*r)
+wn   = 20;       % Frecuencia natural [rad/s]
+zeta = 0.3;      % Amortiguamiento (0 < zeta < 1)
 Tm    = 1e-3;    % Paso de muestreo [s]
-t_fin = 2;       % Duración de la simulación [s]
+t_fin = 2;       % Duracion [s]
 \end{lstlisting}
- 
-Se define un sistema de segundo orden con amortiguamiento $\zeta = 0.3$, que al ser menor que 1 produce una respuesta subamortiguada, es decir, con oscilaciones que se atenúan. La ganancia estática $K = 0.9$ se ha elegido distinta de la referencia para que el sistema se estabilice por debajo de ella y exista un error en régimen permanente medible. La duración de 2 segundos es suficiente para que la señal se asiente, y el paso de $1$ ms fija la precisión temporal de los resultados.
- 
+
+Se definen los datos del sistema. Como \codigo{zeta} está entre 0 y 1, el sistema es subamortiguado. La ganancia \codigo{K} se ha puesto distinta de 1 a propósito: así la señal se estabiliza en 0.9 y no en la referencia 1, lo que permite comprobar que el error permanente se calcula bien. El paso de 1 ms y los 2 s de duración son suficientes para que la señal acabe asentada.
+
+\subsection{Generación de la Señal}
+
 \begin{lstlisting}[language=Matlab]
 t   = (0:Tm:t_fin)';
 wd  = wn*sqrt(1 - zeta^2);
 phi = acos(zeta);
 y   = K*r*(1 - exp(-zeta*wn*t)/sqrt(1 - zeta^2) .* sin(wd*t + phi));
 \end{lstlisting}
- 
-La señal se genera con la expresión analítica de la respuesta al escalón de un sistema de segundo orden subamortiguado:
- 
-\[
-y(t) = K\,r\left(1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\,\sin(\omega_d t + \varphi)\right),
-\quad \omega_d = \omega_n\sqrt{1-\zeta^2},\quad \varphi = \arccos(\zeta)
-\]
- 
-\begin{itemize}
-  \item \codigo{t}\textbf{:} Vector columna de instantes de tiempo, desde 0 hasta \codigo{t\_fin} con paso \codigo{Tm}. La comilla final lo traspone para que sea columna, como espera la función.
-  \item \codigo{wd}\textbf{:} Frecuencia natural amortiguada $\omega_d$ en rad/s.
-  \item \codigo{phi}\textbf{:} Desfase $\varphi$ de la senoidal.
-  \item \codigo{y}\textbf{:} Señal resultante. El operador \codigo{.*} multiplica elemento a elemento los vectores del exponencial y el seno.
-\end{itemize}
- 
-Si en lugar de esta señal sintética se quisiera usar la obtenida con Simulink, bastaría sustituir estas líneas por la lectura de las variables que genera el bloque \codigo{To Workspace} (por ejemplo, \codigo{t = y2.Time; y = y2.Data;} si se guarda como \codigo{Timeseries}).
- 
-\subsection{Llamada a la función y valores teóricos.}
- 
+
+Se crea el vector de tiempos y se calcula la señal con la fórmula de la respuesta de un sistema de segundo orden subamortiguado ante un escalón. La exponencial hace que las oscilaciones se vayan atenuando, y el seno es la oscilación, que ocurre a la frecuencia amortiguada \codigo{wd}.
+
+\subsection{Llamada a la Función y Valores Teóricos}
+
 \begin{lstlisting}[language=Matlab]
 [frec_amortiguada, temp_establecimiento, temp_pico, error_permanente] = ...
     sol_ejercicio_1(t, y, r);
- 
+
 fd_teo  = wd/(2*pi);
 tp_teo  = pi/wd;
 ts_teo  = -log(0.05*sqrt(1 - zeta^2))/(zeta*wn);
 ess_teo = abs(r - K*r);
 \end{lstlisting}
- 
-Primero se invoca la función con la señal, el tiempo y la referencia, y se guardan los cuatro resultados. A continuación se calculan los valores teóricos con las fórmulas conocidas de un sistema de segundo orden:
- 
-\begin{itemize}
-  \item \textbf{Frecuencia amortiguada:} $f_d = \omega_d / 2\pi$, que es la inversa del pseudo-periodo.
-  \item \textbf{Tiempo de pico:} $t_p = \pi / \omega_d$, instante de la primera sobreoscilación.
-  \item \textbf{Tiempo de establecimiento (5\%):} se obtiene igualando la envolvente exponencial de las oscilaciones al 5\%, por lo que es una aproximación.
-  \item \textbf{Error permanente:} $|r - Kr|$, diferencia entre la referencia y el valor final al que tiende el sistema.
+
+Primero se llama a la función con la señal, el tiempo y la referencia. Después se calculan los valores que \textbf{deberían} salir, usando las fórmulas del sistema de segundo orden:
+
+\begin{itemize}[label=$\bullet$]
+  \item \textbf{Frecuencia amortiguada:} $f_d = \omega_d / 2\pi$.
+  \item \textbf{Tiempo de pico:} $t_p = \pi / \omega_d$, que es medio pseudo-periodo.
+  \item \textbf{Tiempo de establecimiento:} Instante en el que las oscilaciones quedan por debajo del 5\%, $t_s = -\ln\left(0.05\sqrt{1-\zeta^2}\right) / (\zeta\omega_n)$.
+  \item \textbf{Error permanente:} $e_{ss} = |r - Kr|$.
 \end{itemize}
- 
-\subsection{Resultados por pantalla.}
- 
+
+\subsection{Resultados por Pantalla}
+
 \begin{lstlisting}[language=Matlab]
+fprintf('\n=== RESULTADOS ===\n');
 fprintf('%-30s %12s %12s\n', 'Magnitud', 'Calculado', 'Teorico');
 fprintf('%-30s %12.4f %12.4f\n', 'Frecuencia amortiguada [Hz]', ...
         frec_amortiguada, fd_teo);
-% ... (una línea equivalente para cada resultado)
+% (igual para el resto de magnitudes)
 \end{lstlisting}
- 
-Se muestra una tabla por la consola de MATLAB con cada magnitud calculada junto a su valor teórico. El formato \codigo{\%-30s} alinea el texto a la izquierda en 30 caracteres y \codigo{\%12.4f} escribe los números con 4 decimales. Los resultados obtenidos se recogen en la Tabla~\ref{tab:resultados}.
- 
-\begin{table}[H]
-  \centering
-  \begin{tabular}{lrr}
-    \toprule
-    \textbf{Magnitud} & \textbf{Calculado} & \textbf{Teórico} \\
-    \midrule
-    Frecuencia amortiguada [Hz]     & 3.0395 & 3.0365 \\
-    Tiempo de establecimiento [s]   & 0.5070 & 0.5071 \\
-    Tiempo de pico [s]              & 0.1650 & 0.1647 \\
-    Error en régimen permanente     & 0.1000 & 0.1000 \\
-    \bottomrule
-  \end{tabular}
-  \caption{Resultados calculados por la función y valores teóricos.}
-  \label{tab:resultados}
-\end{table}
- 
-Los valores calculados coinciden con los teóricos salvo diferencias del orden de la milésima. Esto es lo esperado, porque la función solo puede devolver instantes que coinciden con una muestra, y el paso de muestreo es de $1$ ms. En el caso del tiempo de establecimiento, el valor teórico es además una aproximación basada en la envolvente.
- 
-\subsection{Representación gráfica.}
- 
+
+Se imprime una tabla con el valor calculado por la función y el teórico de cada magnitud. El resultado se puede ver en la \figref{fig:terminal}.
+
+\figura[0.7]{terminal.png}{fig:terminal}{Resultados numéricos en la terminal.}
+
+\subsection{Gráfica de la Señal}
+
 \begin{lstlisting}[language=Matlab]
-y_final = y(end);
-[~, ip] = min(abs(t - temp_pico));
-y_pico  = y(ip);
- 
-plot(t, y, 'b', 'LineWidth', 1.8); hold on; grid on;
+plot(t, y, 'b', 'LineWidth', 1.8);
 plot([t(1) t(end)], [r r], 'k-');
 plot([t(1) t(end)], [y_final y_final], 'k--');
 plot([t(1) t(end)], 1.05*y_final*[1 1], 'b:');
 plot([t(1) t(end)], 0.95*y_final*[1 1], 'b:');
 plot(temp_pico, y_pico, 'ro', 'MarkerFaceColor', 'r');
-plot([temp_establecimiento temp_establecimiento], ...
-     [0 1.05*y_final], 'g--');
+plot([temp_establecimiento temp_establecimiento], [0 1.05*y_final], 'g--');
 plot([t(end) t(end)], [y_final r], 'm-', 'LineWidth', 3);
 \end{lstlisting}
- 
-El script dibuja la señal y superpone sobre ella las magnitudes calculadas, de forma similar a la figura del enunciado:
- 
-\begin{itemize}
-  \item \codigo{min(abs(t - temp\_pico))}\textbf{:} Busca la muestra más cercana al tiempo de pico para obtener su altura \codigo{y\_pico}.
-  \item \textbf{Línea negra continua:} Referencia $r$.
-  \item \textbf{Línea negra discontinua:} Valor final de la señal.
-  \item \textbf{Líneas azules punteadas:} Banda de $\pm5\%$ alrededor del valor final.
-  \item \textbf{Punto rojo:} Primera sobreoscilación, en el instante del tiempo de pico.
-  \item \textbf{Línea vertical verde:} Tiempo de establecimiento, a partir del cual la señal queda dentro de la banda.
-  \item \textbf{Segmento magenta:} Error en régimen permanente, entre el valor final y la referencia.
+
+Se dibuja la señal y se marca sobre ella cada resultado obtenido, como se ve en la \figref{fig:salida}:
+
+\begin{itemize}[label=$\bullet$]
+  \item \textbf{Señal} (azul): la respuesta $y_2(t)$.
+  \item \textbf{Referencia y valor final:} la línea negra continua es la referencia (1) y la discontinua el valor donde se estabiliza la señal (0.9).
+  \item \textbf{Banda del $\pm$5\%:} las dos líneas azules punteadas alrededor del valor final.
+  \item \textbf{Tiempo de pico:} el punto rojo con su línea vertical.
+  \item \textbf{Tiempo de establecimiento:} la línea vertical verde.
+  \item \textbf{Error permanente:} el segmento magenta de la derecha, entre el valor final y la referencia.
 \end{itemize}
- 
-El resultado se muestra en la \figref{fig:respuesta-temporal}.
- 
-\figura[0.9]{respuesta-temporal.png}{fig:respuesta-temporal}{Respuesta temporal de prueba con los resultados calculados.}
- 
-\subsection{Exportación de la figura.}
- 
-\begin{lstlisting}[language=Matlab]
-try
-    exportgraphics(fig, 'respuesta_temporal.pdf', 'ContentType', 'vector');
-    exportgraphics(fig, 'respuesta_temporal.png', 'Resolution', 300);
-catch
-    saveas(fig, 'respuesta_temporal.png');
-    print(fig, 'respuesta_temporal.pdf', '-dpdf', '-bestfit');
-end
-\end{lstlisting}
- 
-Por último, la gráfica se guarda en dos formatos: PDF vectorial, que es el que pide la entrega, y PNG con 300 ppp para incluirlo en este documento. El bloque \codigo{try/catch} intenta usar \codigo{exportgraphics}, disponible en versiones recientes de MATLAB, y, si falla, recurre a \codigo{saveas} y \codigo{print}, que funcionan en versiones antiguas.
+
+Al final, el script guarda la figura en PDF y PNG para la entrega.
+
+\figura[0.8]{diagrama-salida.png}{fig:salida}{Respuesta temporal del sistema.}
+
+\subsection{Interpretación de los Resultados}
+
+La señal de la \figref{fig:salida} es la típica de un sistema subamortiguado: sube rápido, se pasa del valor final (llega a un pico de aproximadamente 1.24), baja, y oscila cada vez menos hasta quedarse quieta. Fíjese en que se estabiliza en 0.9 y no en la referencia 1. El significado de cada resultado de la \figref{fig:terminal} es:
+
+\begin{itemize}[label=$\bullet$]
+  \item \textbf{Frecuencia amortiguada} (3.0395 Hz)\textbf{:} Son las oscilaciones por segundo de la señal, es decir, la inversa del tiempo entre dos picos (unos 0.33 s). Es algo menor que la frecuencia natural ($\omega_n/2\pi \approx 3.18$ Hz) porque el amortiguamiento frena las oscilaciones.
+  \item \textbf{Tiempo de pico} (0.1650 s)\textbf{:} Es lo que tarda la señal en llegar a su primer máximo, el punto rojo. Es más o menos medio pseudo-periodo, porque la señal parte de 0 y tarda media oscilación en llegar arriba.
+  \item \textbf{Tiempo de establecimiento} (0.5070 s)\textbf{:} Es el momento a partir del cual la señal ya no sale de la banda de $\pm$5\% alrededor del valor final (línea verde). Indica lo rápido que se estabiliza el sistema.
+  \item \textbf{Error en régimen permanente} (0.1000)\textbf{:} Es la distancia entre la referencia (1) y el valor donde se estabiliza la señal (0.9), el segmento magenta. Significa que el sistema se estabiliza pero no llega exactamente a lo que se le pide, porque su ganancia es 0.9 y no 1.
+\end{itemize}
+
+\subsection{Comparación con los Valores Teóricos}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Magnitud} & \textbf{Calculado} & \textbf{Teórico} & \textbf{Error relativo} \\
+    \midrule
+    Frecuencia amortiguada [Hz]   & 3.0395 & 3.0365 & 0.10\% \\
+    Tiempo de establecimiento [s] & 0.5070 & 0.5071 & 0.02\% \\
+    Tiempo de pico [s]            & 0.1650 & 0.1647 & 0.18\% \\
+    Error en régimen permanente   & 0.1000 & 0.1000 & 0\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparación entre los valores calculados y los teóricos.}
+\end{table}
+
+Los resultados calculados coinciden con los teóricos con diferencias inferiores al 0.2\%. Esa pequeña diferencia se debe a que la función trabaja con muestras separadas 1 ms, así que solo puede detectar los instantes con esa precisión, mientras que los teóricos se calculan de forma exacta. Por tanto, la función \codigo{sol\_ejercicio\_1} calcula correctamente las cuatro magnitudes pedidas.
+
+\section{Bibliografía}
+
+\subsection{Uso de Inteligencia Artificial}
+
+El código del script de prueba (\codigo{test\_sol\_ejercicio\_1.m}) ha sido programado íntegramente con \textbf{Claude.ai}. Esta misma herramienta se ha utilizado como apoyo en la revisión del formato del documento (realizado en LaTeX). El contenido ha sido revisado y los resultados verificados ejecutando el código en MatLab.
+
+\begin{itemize}[label=$\bullet$]
+  \item Anthropic. \textit{Claude.ai}. \href{https://claude.ai}{https://claude.ai}. Consultado el 31/10/2026.
+\end{itemize}
+
+\subsection{Documentación Oficial de MatLab}
+
+Referencias a la documentación oficial de MathWorks para las funciones empleadas en el código. Consultadas el 31/10/2026.
+
+\begin{itemize}[label=$\bullet$]
+  \item MathWorks. \textit{diff}: Differences and approximate derivatives. \href{https://www.mathworks.com/help/matlab/ref/diff.html}{diff.html}
+  \item MathWorks. \textit{sign}: Sign function. \href{https://www.mathworks.com/help/matlab/ref/sign.html}{sign.html}
+  \item MathWorks. \textit{find}: Find indices and values of nonzero elements. \href{https://www.mathworks.com/help/matlab/ref/find.html}{find.html}
+  \item MathWorks. \textit{max}: Maximum elements of an array. \href{https://www.mathworks.com/help/matlab/ref/max.html}{max.html}
+  \item MathWorks. \textit{nargin}: Number of function input arguments. \href{https://www.mathworks.com/help/matlab/ref/nargin.html}{nargin.html}
+  \item MathWorks. \textit{fprintf}: Write data to text file. \href{https://www.mathworks.com/help/matlab/ref/fprintf.html}{fprintf.html}
+  \item MathWorks. \textit{plot}: 2-D line plot. \href{https://www.mathworks.com/help/matlab/ref/plot.html}{plot.html}
+  \item MathWorks. \textit{yline}: Horizontal line with constant y-value. \href{https://www.mathworks.com/help/matlab/ref/yline.html}{yline.html}
+  \item MathWorks. \textit{xline}: Vertical line with constant x-value. \href{https://www.mathworks.com/help/matlab/ref/xline.html}{xline.html}
+  \item MathWorks. \textit{exportgraphics}: Save plot or graphics content to file. \href{https://www.mathworks.com/help/matlab/ref/exportgraphics.html}{exportgraphics.html}
+\end{itemize}
+
+\subsection{Documentación Oficial de Simulink}
+
+Referencias a la documentación oficial de MathWorks para los bloques utilizados en el modelo. Consultadas el 31/10/2026.
+
+\begin{itemize}[label=$\bullet$]
+  \item MathWorks. \textit{Step}: Generate step function. \href{https://www.mathworks.com/help/simulink/slref/step.html}{step.html}
+  \item MathWorks. \textit{Transfer Fcn}: Model linear system by transfer function. \href{https://www.mathworks.com/help/simulink/slref/transferfcn.html}{transferfcn.html}
+  \item MathWorks. \textit{To Workspace}: Write data to workspace. \href{https://www.mathworks.com/help/simulink/slref/toworkspace.html}{toworkspace.html}
+  \item MathWorks. \textit{Scope}: Display signals generated during simulation. \href{https://www.mathworks.com/help/simulink/slref/scope.html}{scope.html}
+\end{itemize}
+
+\subsection{Documentación de la Asignatura}
+
+\begin{itemize}[label=$\bullet$]
+  \item Universidad de Las Palmas de Gran Canaria. \textit{Sistemas Robóticos Autónomos}: enunciado del Ejercicio Individual 1 y material de la asignatura. Campus Virtual de la ULPGC (Moodle). \href{https://aep27.ulpgc.es/course/view.php?id=2176}{link}
+\end{itemize}
 
 \end{document}
