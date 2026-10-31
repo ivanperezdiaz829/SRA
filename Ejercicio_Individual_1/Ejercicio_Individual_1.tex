@@ -1,0 +1,302 @@
+%!TEX program = xelatex
+% =====================================================================
+%  PLANTILLA DE PRÁCTICAS - Escuela de Ingeniería Informática (ULPGC)
+%  Compilar con XeLaTeX o LuaLaTeX (necesario para fontspec).
+%  Imágenes esperadas en:  images/...
+%    - images/logo_eii.png   -> logotipo ULPGC + EII de la portada
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+% ---------------------------------------------------------------------
+%  DATOS DEL DOCUMENTO  (lo único que hay que tocar en cada práctica)
+% ---------------------------------------------------------------------
+\newcommand{\autor}{Iván Pérez Díaz}
+\newcommand{\fecha}{31/10/2026}
+\newcommand{\asignatura}{Sistemas Robóticos Autónomos}
+\newcommand{\numpractica}{Ejercicio Individual 1}
+\newcommand{\titulopractica}{Respuesta Temporal.}
+
+% Posición del logo de la portada: cuánto se "saca" del margen normal.
+% Margen izquierdo real = 2.5 cm - \logodesplazax ; margen superior real = 2.8 cm - \logodesplazay
+\newlength{\logodesplazax}\setlength{\logodesplazax}{1.2cm}
+\newlength{\logodesplazay}\setlength{\logodesplazay}{1.8cm}
+\newcommand{\logoancho}{0.73\textwidth}
+
+% ---------------------------------------------------------------------
+%  PAQUETES
+% ---------------------------------------------------------------------
+\usepackage{fontspec}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage[normalem]{ulem}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=linkblue,citecolor=black]{hyperref}
+
+% ---------------------------------------------------------------------
+%  TIPOGRAFÍA  (Rubik si está instalada; si no, fuentes de respaldo)
+% ---------------------------------------------------------------------
+%  Texto normal : Rubik Regular
+%  Títulos      : Rubik SemiBold  (\rubiksemibold)
+\IfFontExistsTF{Rubik}{%
+  \setmainfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
+  \setsansfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
+  \IfFontExistsTF{Rubik-SemiBold}{%
+    \newfontfamily\rubiksemibold{Rubik-SemiBold}[BoldFont=Rubik-SemiBold]%
+  }{%
+    \newfontfamily\rubiksemibold{Rubik}[UprightFont=*-Bold]%
+  }%
+}{%
+  \setmainfont{Latin Modern Sans}%
+  \setsansfont{Latin Modern Sans}%
+  \newfontfamily\rubiksemibold{Latin Modern Sans}[BoldFont=*-Bold]%
+}
+\IfFontExistsTF{Fira Code}{\setmonofont{Fira Code}[Scale=0.85]}{%
+  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont{DejaVu Sans Mono}[Scale=0.82]}{%
+    \setmonofont{Latin Modern Mono}}}
+
+% ---------------------------------------------------------------------
+%  COLORES
+% ---------------------------------------------------------------------
+\definecolor{titleblue}{HTML}{0F4C97}     % título de portada
+\definecolor{sectionblue}{HTML}{0B6CB5}   % secciones y subsecciones
+\definecolor{linkblue}{HTML}{1155CC}      % enlaces
+\definecolor{rulegray}{HTML}{B5B5B5}      % línea bajo los títulos
+\definecolor{termbg}{HTML}{1E1F29}        % fondo de terminal
+\definecolor{termfg}{HTML}{E6E6E6}
+
+% ---------------------------------------------------------------------
+%  PÁGINA, PÁRRAFOS E INTERLINEADO
+% ---------------------------------------------------------------------
+\geometry{a4paper,left=2.5cm,right=2.5cm,top=2.8cm,bottom=2.6cm,
+          headheight=15pt,headsep=0.8cm,footskip=1.1cm}
+\linespread{1.2}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{11pt}
+\setlength{\emergencystretch}{2em}
+
+% ---------------------------------------------------------------------
+%  CABECERA Y PIE
+% ---------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+% Zona superior: Rubik normal 12 pt, subrayada de un lado a otro (línea a todo el ancho)
+\newcommand{\txtcabecera}{\fontsize{12}{14}\selectfont\sffamily}
+\fancyhead[L]{\txtcabecera\autor}
+\fancyhead[R]{\txtcabecera\asignatura\ - \numpractica}
+\renewcommand{\headrulewidth}{0.6pt}
+\fancyfoot[C]{\txtcabecera\thepage\ - \pageref*{LastPage}}
+\fancypagestyle{plain}{\fancyhf{}%
+  \fancyhead[L]{\txtcabecera\autor}%
+  \fancyhead[R]{\txtcabecera\asignatura\ - \numpractica}%
+  \fancyfoot[C]{\txtcabecera\thepage\ - \pageref*{LastPage}}%
+  \renewcommand{\headrulewidth}{0.6pt}}
+
+% ---------------------------------------------------------------------
+%  TÍTULOS DE SECCIÓN (cada sección empieza en página nueva)
+% ---------------------------------------------------------------------
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+
+% Título: Rubik semibold 20 pt
+\titleformat{\section}
+  {\rubiksemibold\fontsize{20}{26}\selectfont\color{sectionblue}}
+  {\thesection.}{0.5em}{}
+  [\vspace{0.4em}{\color{rulegray}\titlerule[0.6pt]}]
+\titlespacing*{\section}{0pt}{0pt}{1.6em}
+
+% Subtítulo: Rubik normal 16 pt, subrayado del mismo color que el texto
+\newcommand{\subsecul}[1]{\uline{\thesubsection.\ #1}}
+\titleformat{\subsection}
+  {\sffamily\fontsize{16}{20}\selectfont\color{sectionblue}}
+  {}{0pt}{\subsecul}
+\titlespacing*{\subsection}{0pt}{1.6em}{1em}
+
+\titleformat{\subsubsection}
+  {\rubiksemibold\fontsize{14}{18}\selectfont\color{sectionblue}}
+  {\thesubsubsection.}{0.5em}{}
+\titlespacing*{\subsubsection}{0pt}{1.2em}{0.6em}
+
+\let\oldsection\section
+\renewcommand{\section}{\clearpage\oldsection}
+
+% ---------------------------------------------------------------------
+%  ÍNDICE
+% ---------------------------------------------------------------------
+\addto\captionsspanish{%
+  \renewcommand{\contentsname}{\texorpdfstring{\sffamily\bfseries\fontsize{20}{26}\selectfont\color{sectionblue}\uline{Índice de Contenidos}}{Índice de Contenidos}}%
+}
+\renewcommand{\cfttoctitlefont}{\sffamily\bfseries\fontsize{20}{26}\selectfont\color{sectionblue}}
+\renewcommand{\cftsecfont}{\sffamily\bfseries}
+\renewcommand{\cftsecpagefont}{\sffamily\bfseries}
+\renewcommand{\cftsubsecfont}{\sffamily}
+\renewcommand{\cftsubsecpagefont}{\sffamily}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{0.6em}
+\setlength{\cftbeforesubsecskip}{0.1em}
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{0em}
+\setlength{\cftsecnumwidth}{1.6em}
+\setlength{\cftsubsecnumwidth}{2.6em}
+\setlength{\cftaftertoctitleskip}{1em}
+% ---------------------------------------------------------------------
+%  FIGURAS Y PIES DE FIGURA  →  “Figura 1. Texto del pie.”
+% ---------------------------------------------------------------------
+\captionsetup{format=plain,labelsep=period,font={it,small},
+              justification=centering,singlelinecheck=false,
+              skip=6pt}
+\captionsetup[figure]{justification=centering}
+ 
+% \figura[ancho]{archivo}{etiqueta}{pie de figura}
+%   Ej.:  \figura[0.8]{figura1.png}{fig:apache}{Configuración de Apache.}
+\newcommand{\figura}[4][0.95]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{images/#2}{%
+      \includegraphics[width=#1\textwidth]{images/#2}}{%
+      \fbox{\parbox{#1\textwidth}{\centering\sffamily\vspace{2em}
+        Falta la imagen \texttt{images/#2}\vspace{2em}}}}
+    \caption{#4}\label{#3}
+  \end{figure}}
+ 
+% Referencia a una figura: negrita + cursiva + subrayado + enlace
+\newcommand{\figref}[1]{\hyperref[#1]{\textbf{\textit{\uline{Figura~\ref*{#1}}}}}}
+
+% ---------------------------------------------------------------------
+%  CÓDIGO
+% ---------------------------------------------------------------------
+\newcommand{\codigo}[1]{\texttt{#1}}      % código en línea
+
+\lstdefinestyle{terminal}{
+  backgroundcolor=\color{termbg},
+  basicstyle=\ttfamily\footnotesize\color{termfg},
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  rulecolor=\color{termbg},
+  framesep=6pt,
+  xleftmargin=6pt,xrightmargin=6pt,
+  aboveskip=1em,belowskip=1em,
+  showstringspaces=false,
+  upquote=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
+           {Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¡}{{!`}}1 {¿}{{?`}}1
+}
+\lstset{style=terminal}
+
+% Listas
+\setlist{itemsep=0.2em,topsep=0.3em}
+
+% =====================================================================
+%  DOCUMENTO
+% =====================================================================
+\begin{document}
+
+% ---------------------------------------------------------------------
+%  PORTADA
+% ---------------------------------------------------------------------
+\begin{titlepage}
+  \thispagestyle{empty}
+  \vspace*{-\logodesplazay}%
+  \noindent\hspace*{-\logodesplazax}%
+  \IfFileExists{images/logo_eii.png}{%
+    \includegraphics[width=\logoancho]{images/logo_eii.png}}{%
+    \fbox{\parbox{0.5\textwidth}{\centering\sffamily Falta \texttt{images/logo\_eii.png}}}}
+
+  \vspace*{\fill}
+  \begin{center}
+    \vspace{6em}
+    \sffamily\bfseries\color{titleblue}
+    {\fontsize{26}{32}\selectfont \numpractica: \titulopractica\par}
+    \vspace{0.6em}
+    \sffamily\bfseries\color{titleblue}
+    {\Large (\asignatura)\par}
+  \end{center}
+  \vspace*{\fill}
+  \vspace*{\fill}
+
+  \noindent\sffamily\large \autor\hfill \fecha
+\end{titlepage}
+
+\pagenumbering{arabic}   % la portada no cuenta: el índice es la página 1
+
+% ---------------------------------------------------------------------
+%  ÍNDICE
+% ---------------------------------------------------------------------
+\tableofcontents
+\clearpage
+
+% ---------------------------------------------------------------------
+%  CONTENIDO  (ejemplo; sustituir por el contenido real)
+% ---------------------------------------------------------------------
+\section{Modificación de la configuración del Servidor Apache.}
+
+\subsection{Preparación del certificado raíz de la FNMT.}
+
+El servidor ahora mismo acepta solo certificados firmados por la autoridad
+de la asignatura. Esto es un párrafo de ejemplo con texto justificado y
+sangría en la primera línea, igual que en el documento original, con
+\codigo{código en línea} y un enlace a una página:
+\href{https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt}{https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt}.
+
+Para referenciar una figura se usa \figref{fig:ejemplo}, y se inserta con el
+comando \codigo{\textbackslash figura}:
+
+\figura[0.9]{ejemplo.png}{fig:ejemplo}{Pie de figura de ejemplo.}
+
+Bloque de terminal con fondo oscuro:
+
+\begin{lstlisting}
+$ sudo cp Descargas/AC_FNMT_Usuarios.cer /etc/apache2/ssl
+$ sudo openssl x509 -inform DER -in AC_FNMT_Usuarios.cer -out fnmt_usuarios.pem
+\end{lstlisting}
+
+\subsection{Habilitar la ejecución de Scripts CGI-Bin Bash.}
+
+Texto de la subsección. Lista de ejemplo:
+\begin{itemize}
+  \item Primer elemento.
+  \item Segundo elemento.
+\end{itemize}
+
+\section{Instalación/Creación del Script de sustitución.}
+
+Contenido de la segunda sección.
+
+% ---------------------------------------------------------------------
+%  BIBLIOGRAFÍA
+% ---------------------------------------------------------------------
+\clearpage
+\section*{Bibliografía}
+\addcontentsline{toc}{section}{Bibliografía}
+
+\subsubsection*{Apuntes de la asignatura}
+\begin{itemize}
+  \item[\textbullet] [1] ``Apuntes de SEGURIDAD DE LA INFORMACIÓN'', notas de
+  clase para 40988, Departamento de Informática y Sistemas, Universidad de
+  Las Palmas de Gran Canaria, 2022.
+\end{itemize}
+
+\subsubsection*{Modelos de Inteligencia Artificial}
+\begin{itemize}
+  \item[\textbullet] [2] Google, ``Gemini 3.1 Pro'' [IA generativa y multimodal
+  avanzada], 2026. Disponible en: \url{https://gemini.google.com}
+\end{itemize}
+
+\end{document}
