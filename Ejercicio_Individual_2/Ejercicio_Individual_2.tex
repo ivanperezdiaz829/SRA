@@ -1,0 +1,276 @@
+%!TEX program = xelatex
+% =====================================================================
+%  PLANTILLA DE PRÁCTICAS - Escuela de Ingeniería Informática (ULPGC)
+%  Compilar con XeLaTeX o LuaLaTeX (necesario para fontspec).
+%  Imágenes esperadas en:  images/...
+%    - images/logo_eii.png   -> logotipo ULPGC + EII de la portada
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+% ---------------------------------------------------------------------
+%  DATOS DEL DOCUMENTO  (lo único que hay que tocar en cada práctica)
+% ---------------------------------------------------------------------
+\newcommand{\autor}{Iván Pérez Díaz}
+\newcommand{\fecha}{09/11/2026}
+\newcommand{\asignatura}{Sistemas Robóticos Autónomos}
+\newcommand{\numpractica}{Ejercicio Individual 2}
+\newcommand{\titulopractica}{Análisis de trayectoria.}
+
+% Posición del logo de la portada: cuánto se "saca" del margen normal.
+% Margen izquierdo real = 2.5 cm - \logodesplazax ; margen superior real = 2.8 cm - \logodesplazay
+\newlength{\logodesplazax}\setlength{\logodesplazax}{1.2cm}
+\newlength{\logodesplazay}\setlength{\logodesplazay}{1.8cm}
+\newcommand{\logoancho}{0.73\textwidth}
+
+% ---------------------------------------------------------------------
+%  PAQUETES
+% ---------------------------------------------------------------------
+\usepackage{fontspec}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage[normalem]{ulem}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=linkblue,citecolor=black]{hyperref}
+
+% ---------------------------------------------------------------------
+%  TIPOGRAFÍA  (Rubik si está instalada; si no, fuentes de respaldo)
+% ---------------------------------------------------------------------
+%  Texto normal : Rubik Regular
+%  Títulos      : Rubik SemiBold  (\rubiksemibold)
+\IfFontExistsTF{Rubik}{%
+  \setmainfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
+  \setsansfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
+  \IfFontExistsTF{Rubik-SemiBold}{%
+    \newfontfamily\rubiksemibold{Rubik-SemiBold}[BoldFont=Rubik-SemiBold]%
+  }{%
+    \newfontfamily\rubiksemibold{Rubik}[UprightFont=*-Bold]%
+  }%
+}{%
+  \setmainfont{Latin Modern Sans}%
+  \setsansfont{Latin Modern Sans}%
+  \newfontfamily\rubiksemibold{Latin Modern Sans}[BoldFont=*-Bold]%
+}
+% Fuente monoespaciada del código: Consolas -> Fira Code -> DejaVu Sans Mono -> Latin Modern Mono
+\IfFontExistsTF{Consolas}{\setmonofont{Consolas}[
+    Path = /home/ivanpd/.local/share/fonts/,
+    Extension = .ttf,
+    UprightFont = Consola-Font,
+    BoldFont = Consolas-Bold-Font,
+    ItalicFont = Consolas-Italic-Font,
+    BoldItalicFont = Consolas-Bold-Italic-Font
+]}{%
+  \IfFontExistsTF{Fira Code}{\setmonofont{Fira Code}[Scale=0.85]}{%
+    \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont{DejaVu Sans Mono}[Scale=0.82]}{%
+      \setmonofont{Latin Modern Mono}}}}
+
+% ---------------------------------------------------------------------
+%  COLORES
+% ---------------------------------------------------------------------
+\definecolor{titleblue}{HTML}{0F4C97}     % título de portada
+\definecolor{sectionblue}{HTML}{0B6CB5}   % secciones y subsecciones
+\definecolor{linkblue}{HTML}{1155CC}      % enlaces
+\definecolor{rulegray}{HTML}{B5B5B5}      % línea bajo los títulos
+\definecolor{codebg}{HTML}{F5F5F5}        % fondo de los bloques de código
+\definecolor{bgcmd}{HTML}{F4F4F4}         % fondo del código en línea
+
+% ---------------------------------------------------------------------
+%  PÁGINA, PÁRRAFOS E INTERLINEADO
+% ---------------------------------------------------------------------
+\geometry{a4paper,left=2.5cm,right=2.5cm,top=2.8cm,bottom=2.6cm,
+          headheight=15pt,headsep=0.8cm,footskip=1.1cm}
+\linespread{1.2}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{11pt}
+\setlength{\emergencystretch}{2em}
+
+% ---------------------------------------------------------------------
+%  CABECERA Y PIE
+% ---------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+% Zona superior: Rubik normal 12 pt, subrayada de un lado a otro (línea a todo el ancho)
+\newcommand{\txtcabecera}{\fontsize{12}{14}\selectfont\sffamily}
+\fancyhead[L]{\txtcabecera\autor}
+\fancyhead[R]{\txtcabecera\asignatura\ - \numpractica}
+\renewcommand{\headrulewidth}{0.6pt}
+\fancyfoot[C]{\txtcabecera\thepage\ - \pageref*{LastPage}}
+\fancypagestyle{plain}{\fancyhf{}%
+  \fancyhead[L]{\txtcabecera\autor}%
+  \fancyhead[R]{\txtcabecera\asignatura\ - \numpractica}%
+  \fancyfoot[C]{\txtcabecera\thepage\ - \pageref*{LastPage}}%
+  \renewcommand{\headrulewidth}{0.6pt}}
+
+% ---------------------------------------------------------------------
+%  TÍTULOS DE SECCIÓN (cada sección empieza en página nueva)
+% ---------------------------------------------------------------------
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+
+% Título: Rubik semibold 20 pt
+\titleformat{\section}
+  {\rubiksemibold\fontsize{20}{26}\selectfont\color{sectionblue}}
+  {\thesection.}{0.5em}{}
+  [\vspace{0.4em}{\color{rulegray}\titlerule[0.6pt]}]
+\titlespacing*{\section}{0pt}{0pt}{1.6em}
+
+% Subtítulo: Rubik normal 16 pt, subrayado del mismo color que el texto
+\newcommand{\subsecul}[1]{\uline{\thesubsection.\ #1}}
+\titleformat{\subsection}
+  {\sffamily\fontsize{16}{20}\selectfont\color{sectionblue}}
+  {}{0pt}{\subsecul}
+\titlespacing*{\subsection}{0pt}{1.6em}{1em}
+
+\titleformat{\subsubsection}
+  {\rubiksemibold\fontsize{14}{18}\selectfont\color{sectionblue}}
+  {\thesubsubsection.}{0.5em}{}
+\titlespacing*{\subsubsection}{0pt}{1.2em}{0.6em}
+
+\let\oldsection\section
+\renewcommand{\section}{\clearpage\oldsection}
+
+% ---------------------------------------------------------------------
+%  ÍNDICE
+% ---------------------------------------------------------------------
+\addto\captionsspanish{%
+  \renewcommand{\contentsname}{\texorpdfstring{\sffamily\bfseries\fontsize{20}{26}\selectfont\color{sectionblue}\uline{Índice de Contenidos}}{Índice de Contenidos}}%
+}
+\renewcommand{\cfttoctitlefont}{\sffamily\bfseries\fontsize{20}{26}\selectfont\color{sectionblue}}
+\renewcommand{\cftsecfont}{\sffamily\bfseries}
+\renewcommand{\cftsecpagefont}{\sffamily\bfseries}
+\renewcommand{\cftsubsecfont}{\sffamily}
+\renewcommand{\cftsubsecpagefont}{\sffamily}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{0.6em}
+\setlength{\cftbeforesubsecskip}{0.05em}
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{0em}
+\setlength{\cftsecnumwidth}{1.6em}
+\setlength{\cftsubsecnumwidth}{2.6em}
+\setlength{\cftaftertoctitleskip}{1em}
+% ---------------------------------------------------------------------
+%  FIGURAS Y PIES DE FIGURA  →  Figura 1. Texto del pie.
+% ---------------------------------------------------------------------
+\captionsetup{format=plain,labelsep=period,font={it,small},
+              justification=centering,singlelinecheck=false,
+              skip=6pt}
+\captionsetup[figure]{justification=centering}
+ 
+% \figura[ancho]{archivo}{etiqueta}{pie de figura}
+%   Ej.:  \figura[0.8]{figura1.png}{fig:apache}{Configuración de Apache.}
+\newcommand{\figura}[4][0.95]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{images/#2}{%
+      \includegraphics[width=#1\textwidth]{images/#2}}{%
+      \fbox{\parbox{#1\textwidth}{\centering\sffamily\vspace{2em}
+        Falta la imagen \texttt{images/#2}\vspace{2em}}}}
+    \caption{#4}\label{#3}
+  \end{figure}}
+ 
+% Referencia a una figura: negrita + cursiva + subrayado + enlace
+\newcommand{\figref}[1]{\hyperref[#1]{\textbf{\textit{\uline{Figura~\ref*{#1}}}}}}
+
+% ---------------------------------------------------------------------
+%  CÓDIGO
+% ---------------------------------------------------------------------
+% Código en línea: texto monoespaciado sobre fondo gris claro
+\newcommand{\codigo}[1]{\colorbox{bgcmd}{\texttt{#1}}}
+
+% Bloques de código: fondo gris claro, recuadro gris, numeración a la izquierda
+\lstdefinestyle{codigo}{
+  basicstyle=\ttfamily\fontsize{10}{12}\selectfont,
+  backgroundcolor=\color{codebg},
+  frame=single,             % Recuadro
+  aboveskip=1.5em,          % Espacio extra ANTES del código
+  rulecolor=\color{gray},   % Color del borde
+  xleftmargin=16pt,         % Empuja todo el bloque hacia la derecha
+  framexrightmargin=5pt,    % Aire en el interior derecho
+  xrightmargin=5pt,         % Equilibra el margen derecho
+  breaklines=true,
+  captionpos=b,             % Títulos de código abajo
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal},
+  tabsize=2,
+  showstringspaces=false
+}
+\lstset{style=codigo}
+
+% ---------------------------------------------------------------------
+% Definición de lenguajes extra
+% ---------------------------------------------------------------------
+\lstdefinelanguage{PowerShell}{
+  morekeywords={ss, telnet, dig, ping, ssh},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+\lstdefinelanguage{Python}{
+  keywords={def, return, if, else, elif, for, while, import, from, as, class, try, except},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+
+% Listas
+\setlist{itemsep=0.2em,topsep=0.3em}
+
+% =====================================================================
+%  DOCUMENTO
+% =====================================================================
+\begin{document}
+
+% ---------------------------------------------------------------------
+%  CONTENIDO
+% ---------------------------------------------------------------------
+\section{Transformar los datos en velocidades (\texttt{vel\_Lineal [m/s]}, \texttt{vel\_Angular [rad/s]}, \texttt{t [seg]}), equivalentes a las que podrían obtenerse a partir de sensores inerciales instalados en la plataforma}
+
+Para la obtención de los resultados (cada uno de los apartados), se ha realizado el siguiente código en MatLab, fichero que se puede ver adjunto a la entrega o a través del siguiente enlace:
+\href{https://github.com/ivanperezdiaz829/SRA/blob/main/Ejercicio_Individual_2/sol_ejercicio_2.m}{solución-ejercicio-2-Iván-Pérez-Díaz.m}.
+
+\subsection{Velocidades Lineal y Angular}
+
+Una vez puestos todos los bloques, el diagrama se ve tal y como se aprecia en la \figref{fig:Velocidades}.
+
+\figura[0.9]{Velocidades.png}{fig:Velocidades}{Gráficas de las velocidades obtenidas en MatLab.}
+
+\section{Extraer información que pudiera ser útil desde la perspectiva de un sistema robótico}
+
+\subsection{Tabla de Resultados}
+
+\figura[0.9]{info_trayect.png}{fig:info_trayect}{Tabla de resultados obtenidos en MatLab.}
+
+\section{Conociendo la posición y orientación del robot, reconstruir la trayectoria aplicando las velocidades anteriormente calculadas, y determinar el error que se comente en los siguientes supuestos:}
+
+\subsection{Trayectoria Real del Robot}
+
+\figura[0.9]{Rec_Real.png}{fig:Rec_Real}{Trayectoria del robot obtenida en MatLab.}
+
+\subsection{Comparación de Trayectorias y Tablas de Errores}
+
+A continuación, se muestra una gráfica comparativa de las trayectorias obtenidas \figref{fig:Rec_Real} y \figref{fig:Comp_Recs}, así como la tabla de errores obtenida en MatLab.
+
+\figura[0.9]{Comp_Recs.png}{fig:Comp_Recs}{Comparación de trayectorias .}
+
+Se adjuntan también las tablas de errores obtenidas en MatLab, siendo la primera (\figref{fig:Error_1}) la tabla de errores de una ejecución, y siendo la segunda (\figref{fig:Errores_2}) la tabla de errores tras 100 ejecuciones.
+
+\figura[0.9]{Error_1.png}{fig:Error_1}{Tabla de errores de una ejecución.}
+\figura[0.9]{Errores_2.png}{fig:Errores_2}{Tabla de errores tras 100 ejecuciones (media +- desv. típica).}
+
+\end{document}
