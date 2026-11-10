@@ -11,7 +11,7 @@
 %  DATOS DEL DOCUMENTO  (lo único que hay que tocar en cada práctica)
 % ---------------------------------------------------------------------
 \newcommand{\autor}{Iván Pérez Díaz}
-\newcommand{\fecha}{09/11/2026}
+\newcommand{\fecha}{10/11/2026}
 \newcommand{\asignatura}{Sistemas Robóticos Autónomos}
 \newcommand{\numpractica}{Ejercicio Individual 2}
 \newcommand{\titulopractica}{Análisis de trayectoria.}
@@ -50,14 +50,26 @@
 % ---------------------------------------------------------------------
 %  Texto normal : Rubik Regular
 %  Títulos      : Rubik SemiBold  (\rubiksemibold)
-\IfFontExistsTF{Rubik}{%
-  \setmainfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
-  \setsansfont{Rubik}[UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]%
-  \IfFontExistsTF{Rubik-SemiBold}{%
-    \newfontfamily\rubiksemibold{Rubik-SemiBold}[BoldFont=Rubik-SemiBold]%
-  }{%
-    \newfontfamily\rubiksemibold{Rubik}[UprightFont=*-Bold]%
-  }%
+\newcommand{\rubikpath}{/home/ivanpd/.local/share/fonts/rubik/static/}
+\IfFileExists{\rubikpath Rubik-Regular.ttf}{%
+  \setmainfont{Rubik-Regular}[
+    Path = \rubikpath, Extension = .ttf,
+    UprightFont = Rubik-Regular,
+    BoldFont = Rubik-Bold,
+    ItalicFont = Rubik-Italic,
+    BoldItalicFont = Rubik-BoldItalic]%
+  \setsansfont{Rubik-Regular}[
+    Path = \rubikpath, Extension = .ttf,
+    UprightFont = Rubik-Regular,
+    BoldFont = Rubik-Bold,
+    ItalicFont = Rubik-Italic,
+    BoldItalicFont = Rubik-BoldItalic]%
+  \newfontfamily\rubiksemibold{Rubik-SemiBold}[
+    Path = \rubikpath, Extension = .ttf,
+    UprightFont = Rubik-SemiBold,
+    BoldFont = Rubik-SemiBold,
+    ItalicFont = Rubik-SemiBoldItalic,
+    BoldItalicFont = Rubik-SemiBoldItalic]%
 }{%
   \setmainfont{Latin Modern Sans}%
   \setsansfont{Latin Modern Sans}%
@@ -239,38 +251,40 @@
 % ---------------------------------------------------------------------
 %  CONTENIDO
 % ---------------------------------------------------------------------
-\section{Transformar los datos en velocidades (\texttt{vel\_Lineal [m/s]}, \texttt{vel\_Angular [rad/s]}, \texttt{t [seg]}), equivalentes a las que podrían obtenerse a partir de sensores inerciales instalados en la plataforma}
+\section{Ejercicio Individual 2, Análisis de trayectoria}
+
+\subsection{Transformar los datos en velocidades (vel Lineal [m/s], vel Angular [rad/s], t [seg])}
 
 Para la obtención de los resultados (cada uno de los apartados), se ha realizado el siguiente código en MatLab, fichero que se puede ver adjunto a la entrega o a través del siguiente enlace:
 \href{https://github.com/ivanperezdiaz829/SRA/blob/main/Ejercicio_Individual_2/sol_ejercicio_2.m}{solución-ejercicio-2-Iván-Pérez-Díaz.m}.
 
-\subsection{Velocidades Lineal y Angular}
+\subsubsection{Velocidades Lineal y Angular}
 
 Una vez puestos todos los bloques, el diagrama se ve tal y como se aprecia en la \figref{fig:Velocidades}.
 
 \figura[0.9]{Velocidades.png}{fig:Velocidades}{Gráficas de las velocidades obtenidas en MatLab.}
 
-\section{Extraer información que pudiera ser útil desde la perspectiva de un sistema robótico}
+\subsection{Extraer información que pudiera ser útil desde la perspectiva de un sistema robótico}
 
-\subsection{Tabla de Resultados}
+\subsubsection{Tabla de Resultados}
 
-\figura[0.9]{info_trayect.png}{fig:info_trayect}{Tabla de resultados obtenidos en MatLab.}
+\figura[0.7]{info_trayect.png}{fig:info_trayect}{Tabla de resultados obtenidos en MatLab.}
 
-\section{Conociendo la posición y orientación del robot, reconstruir la trayectoria aplicando las velocidades anteriormente calculadas, y determinar el error que se comente en los siguientes supuestos:}
+\subsection{Reconstruir la trayectoria del robot y obtener el error}
 
-\subsection{Trayectoria Real del Robot}
+\subsubsection{Trayectoria Real del Robot}
 
-\figura[0.9]{Rec_Real.png}{fig:Rec_Real}{Trayectoria del robot obtenida en MatLab.}
+\figura[0.8]{Rec_Real.png}{fig:Rec_Real}{Trayectoria del robot obtenida en MatLab.}
 
-\subsection{Comparación de Trayectorias y Tablas de Errores}
+\subsubsection{Comparación de Trayectorias y Tablas de Errores}
 
 A continuación, se muestra una gráfica comparativa de las trayectorias obtenidas \figref{fig:Rec_Real} y \figref{fig:Comp_Recs}, así como la tabla de errores obtenida en MatLab.
 
-\figura[0.9]{Comp_Recs.png}{fig:Comp_Recs}{Comparación de trayectorias .}
+\figura[0.8]{Comp_Recs.png}{fig:Comp_Recs}{Comparación de trayectorias .}
 
 Se adjuntan también las tablas de errores obtenidas en MatLab, siendo la primera (\figref{fig:Error_1}) la tabla de errores de una ejecución, y siendo la segunda (\figref{fig:Errores_2}) la tabla de errores tras 100 ejecuciones.
 
-\figura[0.9]{Error_1.png}{fig:Error_1}{Tabla de errores de una ejecución.}
-\figura[0.9]{Errores_2.png}{fig:Errores_2}{Tabla de errores tras 100 ejecuciones (media +- desv. típica).}
+\figura[1]{Error_1.png}{fig:Error_1}{Tabla de errores de una ejecución.}
+\figura[1]{Errores_2.png}{fig:Errores_2}{Tabla de errores tras 100 ejecuciones (media +- desv. típica).}
 
 \end{document}
